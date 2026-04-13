@@ -24,11 +24,12 @@ db_config = {
 
 def get_db():
     try:
+        print(f"🔌 Tentando conectar ao banco: {db_config['host']}:{db_config['port']} usuário {db_config['user']}", flush=True)
         conn = mysql.connector.connect(**db_config)
-        print("✅ Conexão com banco estabelecida")
+        print("✅ Conexão com banco estabelecida", flush=True)
         return conn
     except mysql.connector.Error as err:
-        print(f"❌ Erro de conexão: {err}")
+        print(f"❌ Erro de conexão: {err}", flush=True)
         return None
 
 # ============================================
@@ -98,7 +99,7 @@ def formatar_minutos_para_time(minutos):
     return f"{horas:02d}:{mins:02d}:00"
 
 # ============================================
-# Endpoints (idênticos à versão final)
+# Endpoints
 # ============================================
 @app.route('/api/health', methods=['GET', 'OPTIONS'])
 def health():
@@ -114,18 +115,24 @@ def login():
         data = request.json
         chPessoa = data.get('chPessoa')
         senha = data.get('senha')
-        print(f"🔐 Login: {chPessoa} - {senha}")
+        print(f"🔐 Login recebido: chPessoa={chPessoa}, senha={senha}", flush=True)
+        
         conn = get_db()
+        print(f"📡 Conexão obtida: {conn is not None}", flush=True)
         if not conn:
             return jsonify({'success': False, 'error': 'Erro de conexão'}), 500
+            
         cursor = conn.cursor(dictionary=True)
+        print(f"🔍 Executando consulta para chPessoa={chPessoa}", flush=True)
         cursor.execute("""
             SELECT * FROM timesheet_embarque 
             WHERE chPessoa = %s AND senhaembarque = %s AND status IN (0, 1)
         """, (chPessoa, senha))
         user = cursor.fetchone()
+        print(f"👤 Usuário encontrado: {user is not None}", flush=True)
         cursor.close()
         conn.close()
+        
         if user:
             response_data = {
                 'success': True,
@@ -142,7 +149,8 @@ def login():
         else:
             return jsonify({'success': False}), 401
     except Exception as e:
-        print(f"❌ ERRO login: {e}")
+        print(f"❌ ERRO login: {e}", flush=True)
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/dados-funcionario/<path:chPessoa>', methods=['GET', 'OPTIONS'])
@@ -169,23 +177,8 @@ def get_dados_funcionario(chPessoa):
         else:
             return jsonify({'success': False, 'error': 'Funcionário não encontrado'}), 404
     except Exception as e:
+        print(f"❌ ERRO dados-funcionario: {e}", flush=True)
         return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/teste', methods=['GET'])
-def teste():
-    try:
-        conn = get_db()
-        if not conn:
-            return jsonify({'erro': 'Erro de conexão'}), 500
-        cursor = conn.cursor()
-        cursor.execute("SELECT chPessoa, senhaembarque, status FROM timesheet_embarque")
-        result = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        result_json = [{'chPessoa': row[0], 'senhaembarque': row[1], 'status': row[2]} for row in result]
-        return jsonify({'dados': result_json})
-    except Exception as e:
-        return jsonify({'erro': str(e)}), 500
 
 @app.route('/api/registros/<path:chPessoa>', methods=['GET', 'OPTIONS'])
 def get_registros(chPessoa):
@@ -221,7 +214,7 @@ def get_registros(chPessoa):
             registros_formatados.append(novo_reg)
         return jsonify(registros_formatados)
     except Exception as e:
-        print(f"❌ ERRO: {e}")
+        print(f"❌ ERRO get_registros: {e}", flush=True)
         traceback.print_exc()
         return jsonify([]), 500
 
@@ -244,7 +237,7 @@ def salvar_registro():
         minutos_totais = calcular_minutos_trabalhados(inicio_turno, parada_refeicao, retorno_refeicao, fim_turno)
         totalhoras = formatar_minutos_para_time(minutos_totais)
 
-        print(f"💾 Registro: {chPessoa} - {data_registro} (dia {dia_numero}) -> totalhoras={totalhoras}")
+        print(f"💾 Registro: {chPessoa} - {data_registro} (dia {dia_numero}) -> totalhoras={totalhoras}", flush=True)
 
         conn = get_db()
         if not conn:
@@ -268,7 +261,7 @@ def salvar_registro():
               fim_turno, horas_normais, totalhoras))
 
         conn.commit()
-        print("✅ Registro salvo.")
+        print("✅ Registro salvo.", flush=True)
 
         # Atualiza status do funcionário se ainda estiver 0
         cursor.execute("""
@@ -278,13 +271,13 @@ def salvar_registro():
         """, (chPessoa, senhaembarque))
         if cursor.rowcount > 0:
             conn.commit()
-            print(f"✅ Status do funcionário {chPessoa} atualizado para 1.")
+            print(f"✅ Status do funcionário {chPessoa} atualizado para 1.", flush=True)
 
         cursor.close()
         conn.close()
         return jsonify({'success': True})
     except Exception as e:
-        print(f"❌ ERRO: {e}")
+        print(f"❌ ERRO salvar_registro: {e}", flush=True)
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -306,7 +299,7 @@ def atualizar_fim_jornada():
         conn.close()
         return jsonify({'success': True})
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"❌ ERRO atualizar-fim-jornada: {e}", flush=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/AppMobile/<path:filename>')
@@ -314,7 +307,7 @@ def serve_appmobile(filename):
     try:
         return send_from_directory('AppMobile', filename)
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"Erro ao servir arquivo estático: {e}", flush=True)
         return "Arquivo não encontrado", 404
 
 @app.route('/')
