@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Timesheet - Registro de Jornada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #2A5C8F;
+            color: white;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .header .empresa {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .header .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .header .info-row span {
+            font-weight: 600;
+        }
+
+        .header .periodo {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .tabela-registros {
+            background: white;
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        .tabela-header {
+            display: grid;
+            grid-template-columns: 70px repeat(4, 1fr) 70px;
+            gap: 4px;
+            padding: 8px 0;
+            border-bottom: 2px solid #2A5C8F;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2A5C8F;
+            font-size: 13px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .tabela-linha {
+            display: grid;
+            grid-template-columns: 70px repeat(4, 1fr) 70px;
+            gap: 4px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            align-items: center;
+        }
+
+        .data-col {
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .total-cell {
+            text-align: right;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            padding-right: 4px;
+        }
+
+        .horario-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: white;
+            padding: 4px 0;
+            font-size: 18px;
+        }
+
+        .horario-group.registrado {
+            border-color: #4CAF50;
+            background-color: #f0f8f0;
+        }
+
+        .horario-group select {
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            padding: 0;
+            -webkit-appearance: none;
+            appearance: none;
+            outline: none;
+            width: 3ch;
+            min-width: 0;
+            line-height: 1;
+            text-align-last: center;
+        }
+
+        .horario-group select:disabled {
+            color: #aaa;
+            background-color: transparent;
+        }
+
+        .horario-group span.separador {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1;
+            margin: 0 1px;
+        }
+
+        .btn-adicionar {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 0;
+            transition: background 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-adicionar:active {
+            background-color: #388E3C;
+        }
+
+        .botoes-acoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-desembarcar {
+            flex: 1;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-desembarcar:active {
+            background-color: #f57c00;
+        }
+
+        .btn-sair {
+            flex: 1;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-sair:active {
+            background-color: #b71c1c;
+        }
+
+        @media (max-width: 480px) {
+            .tabela-header {
+                grid-template-columns: 60px repeat(4, 1fr) 60px;
+                font-size: 12px;
+            }
+            .tabela-linha {
+                grid-template-columns: 60px repeat(4, 1fr) 60px;
+            }
+            .horario-group {
+                font-size: 16px;
+            }
+            .horario-group select {
+                font-size: 16px;
+                width: 2.8ch;
+            }
+            .horario-group span.separador {
+                font-size: 16px;
+            }
+            .data-col {
+                font-size: 14px;
+            }
+            .total-cell {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="empresa">SEMIHERMATICS DO BRASIL</div>
+        <div class="info-row">
+            <span>Cliente: <span id="cliente"></span></span>
+            <span>Unidade: <span id="unidade"></span></span>
+        </div>
+        <div class="info-row">
+            <span>Funcionário: <span id="funcionario"></span></span>
+        </div>
+        <div class="periodo" id="periodoInfo">
+            Período de embarque: <span id="dataInicio"></span> até <span id="dataFim"></span>
+        </div>
+    </div>
+
+    <div class="tabela-registros">
+        <div class="tabela-header">
+            <div>Data</div>
+            <div>Início</div>
+            <div>Pausa</div>
+            <div>Retorno</div>
+            <div>Fim Exp.</div>
+            <div>Total</div>
+        </div>
+        <div id="registrosContainer"></div>
+    </div>
+
+    <div class="botoes-acoes">
+        <button class="btn-desembarcar" onclick="desembarcar()">⛵ Desembarcar</button>
+        <button class="btn-sair" onclick="sair()">🚪 Sair</button>
+    </div>
+
+    <script>
+        // Função para obter data local no formato YYYY-MM-DD
+        function obterDataLocal() {
+            const d = new Date();
+            const ano = d.getFullYear();
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const dia = String(d.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        // Verifica se está logado
+        if (!localStorage.getItem('chPessoa')) {
+            alert('Você não está logado. Redirecionando para o login.');
+            window.location.href = 'index.html';
+        }
+
+        // Configuração inicial
+        let funcionario = {
+            nome: localStorage.getItem('chPessoa') || '',
+            unidade: localStorage.getItem('unidadeoperacional') || '',
+            cliente: localStorage.getItem('cliente') || '',
+            inicio: localStorage.getItem('iniciojornada') || '',
+            fim: localStorage.getItem('fimjornada') || ''
+        };
+
+        const hoje = obterDataLocal();
+        let registros = {};
+
+        // Funções auxiliares
+        function converterParaMinutos(horario) {
+            if (!horario) return 0;
+            const [h, m] = horario.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function calcularHoras(jornada) {
+            if (!jornada.inicio || !jornada.fim) return 0;
+
+            let inicio = converterParaMinutos(jornada.inicio);
+            let fim = converterParaMinutos(jornada.fim);
+
+            if (fim < inicio) fim += 24 * 60;
+
+            const temPausa = jornada.pausa && jornada.pausa.trim() !== '';
+            const temRetorno = jornada.retorno && jornada.retorno.trim() !== '';
+
+            if (temPausa && temRetorno) {
+                let pausa = converterParaMinutos(jornada.pausa);
+                let retorno = converterParaMinutos(jornada.retorno);
+                if (retorno < pausa) retorno += 24 * 60;
+                return Math.max((fim - inicio) - (retorno - pausa), 0);
+            } else if (!temPausa && !temRetorno) {
+                return Math.max(fim - inicio, 0);
+            } else {
+                return 0;
+            }
+        }
+
+        function formatarHoras(minutos) {
+            if (minutos <= 0) return '--:--';
+            const h = Math.floor(minutos / 60);
+            const m = minutos % 60;
+            return `${h}h${m.toString().padStart(2, '0')}`;
+        }
+
+        function gerarDias(inicioStr, fimStr) {
+            if (!inicioStr || !fimStr) return [];
+            const inicio = new Date(inicioStr + 'T00:00:00');
+            const fim = new Date(fimStr + 'T00:00:00');
+            const dias = [];
+            let current = new Date(inicio);
+            while (current <= fim) {
+                const ano = current.getFullYear();
+                const mes = String(current.getMonth() + 1).padStart(2, '0');
+                const dia = String(current.getDate()).padStart(2, '0');
+                dias.push(`${ano}-${mes}-${dia}`);
+                current.setDate(current.getDate() + 1);
+            }
+            return dias;
+        }
+
+        async function carregarDadosFuncionario() {
+            if (!funcionario.nome) return;
+
+            try {
+                const response = await fetch(`/api/dados-funcionario/${funcionario.nome}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    funcionario.cliente = data.dados.cliente || funcionario.cliente;
+                    funcionario.unidade = data.dados.unidadeoperacional || funcionario.unidade;
+                    funcionario.inicio = data.dados.iniciojornada || funcionario.inicio;
+                    funcionario.fim = data.dados.fimjornada || funcionario.fim;
+
+                    localStorage.setItem('cliente', funcionario.cliente);
+                    localStorage.setItem('unidadeoperacional', funcionario.unidade);
+                    localStorage.setItem('iniciojornada', funcionario.inicio);
+                    localStorage.setItem('fimjornada', funcionario.fim);
+
+                    document.getElementById('cliente').textContent = funcionario.cliente;
+                    document.getElementById('unidade').textContent = funcionario.unidade;
+                    document.getElementById('funcionario').textContent = funcionario.nome;
+                    document.getElementById('dataInicio').textContent = funcionario.inicio.split('-').reverse().join('/');
+                    document.getElementById('dataFim').textContent = funcionario.fim.split('-').reverse().join('/');
+                }
+            } catch (error) {
+                // Mensagem de depuração removida
+            }
+        }
+
+        function normalizarHorario(valor) {
+            if (!valor) return null;
+            valor = valor.trim();
+            let partes = valor.split(':');
+            if (partes.length < 2) return null;
+            let hora = partes[0].padStart(2, '0');
+            let minuto = partes[1].padStart(2, '0');
+            const h = parseInt(hora, 10);
+            const m = parseInt(minuto, 10);
+            if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+            if (h === 0 && m === 0 && partes.length >= 3 && partes[2] === '00') return null;
+            return `${hora}:${minuto}`;
+        }
+
+        async function carregarRegistros() {
+            try {
+                const response = await fetch(`/api/registros/${funcionario.nome}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    registros = {};
+                    
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach(item => {
+                            const diaNumero = item.dia_numero || 1;
+                            if (!registros[item.data]) registros[item.data] = [];
+                            registros[item.data].push({
+                                dia_numero: diaNumero,
+                                inicio: normalizarHorario(item.inicio_turno),
+                                pausa: normalizarHorario(item.parada_refeicao),
+                                retorno: normalizarHorario(item.retorno_refeicao),
+                                fim: normalizarHorario(item.fim_turno)
+                            });
+                        });
+                        
+                        for (let data in registros) {
+                            registros[data].sort((a, b) => a.dia_numero - b.dia_numero);
+                        }
+                    }
+                }
+            } catch (error) {
+                // Mensagem de depuração removida
+            }
+            renderizar();
+        }
+
+        async function salvarRegistroNoServidor(data, dia_numero, jornada) {
+            try {
+                const totalMin = calcularHoras(jornada);
+                const horasNormais = Math.round((totalMin / 60) * 100) / 100;
+
+                const payload = {
+                    chPessoa: funcionario.nome,
+                    senhaembarque: localStorage.getItem('senhaembarque') || '',
+                    data: data,
+                    dia_numero: dia_numero,
+                    inicio_turno: jornada.inicio || '',
+                    parada_refeicao: jornada.pausa || '',
+                    retorno_refeicao: jornada.retorno || '',
+                    fim_turno: jornada.fim || '',
+                    horas_normais: horasNormais
+                };
+
+                await fetch(`/api/registro-diario`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                // Mensagem de depuração removida
+            }
+        }
+
+        function atualizarHorario(data, dia_numero, tipo, hora, minuto) {
+            if (!registros[data]) registros[data] = [];
+
+            let jornada = registros[data].find(j => j.dia_numero === dia_numero);
+            if (!jornada) {
+                jornada = { dia_numero, inicio: null, pausa: null, retorno: null, fim: null };
+                registros[data].push(jornada);
+                registros[data].sort((a, b) => a.dia_numero - b.dia_numero);
+            }
+
+            if (hora === '' || minuto === '') {
+                jornada[tipo] = null;
+            } else {
+                const horaStr = hora.padStart(2, '0');
+                const minStr = minuto.padStart(2, '0');
+                jornada[tipo] = `${horaStr}:${minStr}`;
+            }
+
+            salvarRegistroNoServidor(data, dia_numero, jornada);
+            renderizar();
+        }
+
+        function gerarOpcoesHora(valorSelecionado) {
+            let options = '<option value="" ' + (valorSelecionado === '' ? 'selected' : '') + '>--</option>';
+            for (let i = 0; i <= 23; i++) {
+                const hora = i.toString().padStart(2, '0');
+                const selected = (valorSelecionado === hora) ? 'selected' : '';
+                options += `<option value="${hora}" ${selected}>${hora}</option>`;
+            }
+            return options;
+        }
+
+        function gerarOpcoesMinuto(valorSelecionado) {
+            let options = '<option value="" ' + (valorSelecionado === '' ? 'selected' : '') + '>--</option>';
+            for (let i = 0; i <= 59; i++) {
+                const minuto = i.toString().padStart(2, '0');
+                const selected = (valorSelecionado === minuto) ? 'selected' : '';
+                options += `<option value="${minuto}" ${selected}>${minuto}</option>`;
+            }
+            return options;
+        }
+
+        function renderizar() {
+            const container = document.getElementById('registrosContainer');
+            container.innerHTML = '';
+
+            const dias = gerarDias(funcionario.inicio, funcionario.fim);
+
+            dias.forEach(data => {
+                const jornadas = registros[data] || [];
+                const dataFormatada = data.split('-').reverse().slice(0,2).join('/');
+                const isFuturo = data > hoje;
+
+                jornadas.forEach(jornada => {
+                    const total = calcularHoras(jornada);
+                    const linha = document.createElement('div');
+                    linha.className = 'tabela-linha';
+                    linha.setAttribute('data-data', data);
+                    linha.setAttribute('data-dia-numero', jornada.dia_numero);
+                    
+                    const criarGrupoHorario = (tipo, valor) => {
+                        const hora = valor ? valor.split(':')[0] : '';
+                        const minuto = valor ? valor.split(':')[1] : '';
+                        const registradoClass = valor ? 'registrado' : '';
+                        const disabledAttr = isFuturo ? 'disabled' : '';
+                        return `
+                            <div class="horario-group ${registradoClass}">
+                                <select class="hora" data-tipo="${tipo}" data-part="hora" ${disabledAttr}>
+                                    ${gerarOpcoesHora(hora)}
+                                </select>
+                                <span class="separador">:</span>
+                                <select class="minuto" data-tipo="${tipo}" data-part="minuto" ${disabledAttr}>
+                                    ${gerarOpcoesMinuto(minuto)}
+                                </select>
+                            </div>
+                        `;
+                    };
+
+                    linha.innerHTML = `
+                        <div class="data-col">${dataFormatada}</div>
+                        <div class="horario-cell">${criarGrupoHorario('inicio', jornada.inicio)}</div>
+                        <div class="horario-cell">${criarGrupoHorario('pausa', jornada.pausa)}</div>
+                        <div class="horario-cell">${criarGrupoHorario('retorno', jornada.retorno)}</div>
+                        <div class="horario-cell">${criarGrupoHorario('fim', jornada.fim)}</div>
+                        <div class="total-cell">${formatarHoras(total)}</div>
+                    `;
+                    container.appendChild(linha);
+                });
+
+                if (jornadas.length === 0) {
+                    const linhaVazia = document.createElement('div');
+                    linhaVazia.className = 'tabela-linha';
+                    linhaVazia.setAttribute('data-data', data);
+                    linhaVazia.setAttribute('data-dia-numero', '1');
+                    
+                    const criarGrupoVazio = (tipo) => {
+                        const disabledAttr = isFuturo ? 'disabled' : '';
+                        return `
+                            <div class="horario-group">
+                                <select class="hora" data-tipo="${tipo}" data-part="hora" ${disabledAttr}>
+                                    ${gerarOpcoesHora('')}
+                                </select>
+                                <span class="separador">:</span>
+                                <select class="minuto" data-tipo="${tipo}" data-part="minuto" ${disabledAttr}>
+                                    ${gerarOpcoesMinuto('')}
+                                </select>
+                            </div>
+                        `;
+                    };
+
+                    linhaVazia.innerHTML = `
+                        <div class="data-col">${dataFormatada}</div>
+                        <div class="horario-cell">${criarGrupoVazio('inicio')}</div>
+                        <div class="horario-cell">${criarGrupoVazio('pausa')}</div>
+                        <div class="horario-cell">${criarGrupoVazio('retorno')}</div>
+                        <div class="horario-cell">${criarGrupoVazio('fim')}</div>
+                        <div class="total-cell">--:--</div>
+                    `;
+                    container.appendChild(linhaVazia);
+                }
+
+                if (data === hoje && !isFuturo) {
+                    const ultimaJornada = jornadas.length > 0 ? jornadas[jornadas.length - 1] : null;
+                    const podeAdicionar = jornadas.length === 0 || (ultimaJornada.inicio && ultimaJornada.fim && 
+                        ((ultimaJornada.pausa && ultimaJornada.retorno) || (!ultimaJornada.pausa && !ultimaJornada.retorno)));
+                    
+                    if (podeAdicionar) {
+                        const btnDiv = document.createElement('div');
+                        btnDiv.className = 'tabela-linha';
+                        btnDiv.style.gridTemplateColumns = '70px repeat(4, 1fr) 70px';
+                        btnDiv.innerHTML = `
+                            <div class="data-col"></div>
+                            <div class="horario-cell" colspan="4" style="grid-column: span 4;">
+                                <button class="btn-adicionar">➕ Adicionar jornada</button>
+                            </div>
+                            <div class="total-cell"></div>
+                        `;
+                        const btn = btnDiv.querySelector('.btn-adicionar');
+                        btn.addEventListener('click', () => adicionarJornada(data));
+                        container.appendChild(btnDiv);
+                    }
+                }
+            });
+
+            document.querySelectorAll('.horario-group select:not(:disabled)').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const linha = e.target.closest('.tabela-linha');
+                    const data = linha.dataset.data;
+                    const dia_numero = parseInt(linha.dataset.diaNumero);
+                    const tipo = e.target.dataset.tipo;
+                    
+                    const grupo = e.target.closest('.horario-group');
+                    const horaSelect = grupo.querySelector('select.hora');
+                    const minSelect = grupo.querySelector('select.minuto');
+                    
+                    if (horaSelect && minSelect) {
+                        const hora = horaSelect.value;
+                        const minuto = minSelect.value;
+                        if (hora === '' && minuto === '') {
+                            atualizarHorario(data, dia_numero, tipo, '', '');
+                        } else if (hora !== '' && minuto !== '') {
+                            atualizarHorario(data, dia_numero, tipo, hora, minuto);
+                        }
+                    }
+                });
+            });
+        }
+
+        async function adicionarJornada(data) {
+            if (data !== hoje) return;
+            if (!registros[data]) registros[data] = [];
+            const diasExistentes = registros[data].map(j => j.dia_numero);
+            const novoDiaNumero = diasExistentes.length > 0 ? Math.max(...diasExistentes) + 1 : 1;
+            registros[data].push({
+                dia_numero: novoDiaNumero,
+                inicio: null,
+                pausa: null,
+                retorno: null,
+                fim: null
+            });
+            registros[data].sort((a, b) => a.dia_numero - b.dia_numero);
+            renderizar();
+        }
+
+        async function desembarcar() {
+            if (!confirm('Confirma o desembarque? Isso encerrará o período de embarque na data de hoje.')) return;
+            const dataDesembarque = hoje;
+            try {
+                const response = await fetch(`/api/atualizar-fim-jornada`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chPessoa: funcionario.nome, fimjornada: dataDesembarque })
+                });
+                if (response.ok) {
+                    alert('Desembarque registrado com sucesso!');
+                    localStorage.removeItem('chPessoa');
+                    localStorage.removeItem('senhaembarque');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Erro ao registrar desembarque.');
+                }
+            } catch (error) {
+                // Mensagem de depuração removida
+                alert('Erro de conexão.');
+            }
+        }
+
+        function sair() {
+            if (confirm('Deseja realmente sair?')) window.location.href = 'index.html';
+        }
+
+        async function inicializar() {
+            await carregarDadosFuncionario();
+            await carregarRegistros();
+        }
+
+        inicializar();
+    </script>
+</body>
+</html>

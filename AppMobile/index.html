@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Timesheet SHB - Login</title>
+    <style>
+        /* (mesmo estilo anterior, mantido) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #2A5C8F;
+            --primary-dark: #1D3F63;
+            --secondary: #4CAF50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --light: #f5f5f5;
+            --dark: #333;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,92,143,0.1);
+        }
+
+        .pin-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .pin-box {
+            width: 60px;
+            height: 70px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .pin-box.filled {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 2px 8px rgba(42,92,143,0.2);
+        }
+
+        .pin-box.error {
+            border-color: var(--danger);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .teclado {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .key {
+            padding: 18px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .key:active {
+            background: var(--primary);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .key.delete {
+            background: #fee;
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .key.confirm {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 8px 0;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(42,92,143,0.3);
+        }
+
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .attempts {
+            text-align: center;
+            color: var(--danger);
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--primary);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .info-box i {
+            font-size: 24px;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px 16px;
+            }
+            
+            .pin-box {
+                width: 50px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .key {
+                padding: 12px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="card">
+            <div class="logo">
+                <h1>⏱️ SEMIHERMATICS</h1>
+                <p>Sistema de Controle de Embarque</p>
+            </div>
+
+            <div class="input-field">
+                <label>👤 ID do Funcionário</label>
+                <input type="text" id="chPessoa" placeholder="Ex: FUNC001" autocomplete="off">
+            </div>
+
+            <div class="pin-container" id="pinContainer">
+                <div class="pin-box" data-index="0">_</div>
+                <div class="pin-box" data-index="1">_</div>
+                <div class="pin-box" data-index="2">_</div>
+                <div class="pin-box" data-index="3">_</div>
+            </div>
+
+            <!-- Teclado Numérico -->
+            <div id="tecladoNumeros" class="teclado">
+                <div class="key" onclick="digitar('1')">1</div>
+                <div class="key" onclick="digitar('2')">2</div>
+                <div class="key" onclick="digitar('3')">3</div>
+                <div class="key" onclick="digitar('4')">4</div>
+                <div class="key" onclick="digitar('5')">5</div>
+                <div class="key" onclick="digitar('6')">6</div>
+                <div class="key" onclick="digitar('7')">7</div>
+                <div class="key" onclick="digitar('8')">8</div>
+                <div class="key" onclick="digitar('9')">9</div>
+                <div class="key" onclick="digitar('0')">0</div>
+                <div class="key delete" onclick="removerPIN()">⌫</div>
+                <div class="key confirm" onclick="fazerLogin()">✓</div>
+            </div>
+
+            <button class="login-btn" onclick="fazerLogin()" id="btnLogin">
+                🔓 ENTRAR
+            </button>
+
+            <div class="attempts" id="attemptsDisplay">
+                Tentativas restantes: 3
+            </div>
+
+            <div class="info-box">
+                <i>ℹ️</i>
+                <span>Use a senha de 4 dígitos numéricos fornecida pela retaguarda.</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO - URL da API (use caminho relativo se estiver no mesmo domínio)
+        const API_URL = ''; // Deixe vazio para usar caminhos relativos (ex: /api/login)
+        let pinAtual = '';
+        let tentativasRestantes = 3;
+        let bloqueado = false;
+
+        // ==================== FUNÇÕES DO TECLADO ====================
+        function digitar(caractere) {
+            if (bloqueado || pinAtual.length >= 4) return;
+            pinAtual += caractere;
+            atualizarDisplayPIN();
+        }
+
+        function removerPIN() {
+            if (bloqueado) return;
+            pinAtual = pinAtual.slice(0, -1);
+            atualizarDisplayPIN();
+        }
+
+        function atualizarDisplayPIN() {
+            const boxes = document.querySelectorAll('.pin-box');
+            boxes.forEach((box, index) => {
+                if (index < pinAtual.length) {
+                    box.textContent = '●';
+                    box.classList.add('filled');
+                    box.classList.remove('error');
+                } else {
+                    box.textContent = '_';
+                    box.classList.remove('filled');
+                }
+            });
+        }
+
+        function mostrarErroPIN() {
+            const boxes = document.querySelectorAll('.pin-box');
+            boxes.forEach(box => box.classList.add('error'));
+            setTimeout(() => {
+                boxes.forEach(box => box.classList.remove('error'));
+            }, 500);
+        }
+
+        // ==================== FUNÇÃO DE LOGIN ====================
+        async function fazerLogin() {
+            if (bloqueado) {
+                alert('Sistema bloqueado. Contate o supervisor.');
+                return;
+            }
+
+            const chPessoa = document.getElementById('chPessoa').value.trim();
+            
+            if (!chPessoa) {
+                alert('Digite seu ID de funcionário!');
+                return;
+            }
+
+            if (pinAtual.length < 4) {
+                alert('Digite os 4 dígitos da senha!');
+                mostrarErroPIN();
+                return;
+            }
+
+            try {
+                const btnLogin = document.getElementById('btnLogin');
+                btnLogin.disabled = true;
+                btnLogin.textContent = '⏳ Validando...';
+
+                console.log('🔐 Tentando login com:', { chPessoa, senha: pinAtual });
+
+                const response = await fetch(`/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chPessoa, senha: pinAtual })
+                });
+
+                const data = await response.json();
+                console.log('📦 Resposta da API:', data);
+
+                if (data.success) {
+                    // Salvar dados do funcionário no localStorage
+                    localStorage.setItem('chPessoa', data.chPessoa);
+                    localStorage.setItem('senhaembarque', data.senhaembarque);
+                    localStorage.setItem('cliente', data.cliente || '');
+                    localStorage.setItem('unidadeoperacional', data.unidadeoperacional || '');
+                    localStorage.setItem('supervisor', data.supervisor || '');
+                    localStorage.setItem('iniciojornada', data.iniciojornada || '');
+                    localStorage.setItem('fimjornada', data.fimjornada || '');
+                    localStorage.setItem('qtddias', data.qtddias || '0');
+
+                    // Compatibilidade
+                    localStorage.setItem('dt_inicio', data.iniciojornada || '');
+                    localStorage.setItem('dt_fim', data.fimjornada || '');
+                    localStorage.setItem('chCliente', data.cliente || '');
+                    localStorage.setItem('chUnidadeOperacional', data.unidadeoperacional || '');
+
+                    console.log('✅ Dados salvos no localStorage');
+
+                    window.location.href = 'timesheet.html';
+                } else {
+                    tentativasRestantes--;
+                    document.getElementById('attemptsDisplay').textContent = `Tentativas restantes: ${tentativasRestantes}`;
+                    
+                    if (tentativasRestantes <= 0) {
+                        bloqueado = true;
+                        document.getElementById('attemptsDisplay').textContent = '❌ BLOQUEADO - Contate o supervisor';
+                    }
+                    
+                    alert('Senha incorreta!');
+                    pinAtual = '';
+                    atualizarDisplayPIN();
+                    mostrarErroPIN();
+                }
+            } catch (error) {
+                console.error('❌ Erro na requisição:', error);
+                alert('Erro de conexão: ' + error.message);
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.textContent = '🔓 ENTRAR';
+            }
+        }
+
+        // ==================== TESTE DE CONEXÃO INICIAL ====================
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`/api/health`);
+                const data = await response.json();
+                console.log('✅ API conectada:', data);
+            } catch (error) {
+                console.error('❌ API não respondeu:', error);
+                alert('Atenção: API não está respondendo!\nVerifique se o servidor está rodando.');
+            }
+        });
+    </script>
+</body>
+</html>
