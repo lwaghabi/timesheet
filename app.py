@@ -316,3 +316,20 @@ def index():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
+
+@app.route('/api/test-db', methods=['GET'])
+def test_db():
+    try:
+        import mysql.connector
+        import os
+        conn = mysql.connector.connect(
+            host=os.getenv('mysql.sistemaos.com.br'),
+            user=os.getenv('sistemaos03'),
+            password=os.getenv('zinholui47'),
+            database=os.getenv('sistemaos03'),
+            port=int(os.getenv('DB_PORT', 3306))
+        )
+        conn.close()
+        return jsonify({'success': True, 'message': 'Conexão com banco OK'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
