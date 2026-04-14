@@ -15,11 +15,11 @@ CORS(app, origins='*')
 # CONFIGURAÇÃO DO BANCO DE DADOS (via variáveis de ambiente)
 # ============================================
 db_config = {
-    'host': os.getenv('mysql.sistemaos.com.br'),
-    'user': os.getenv('sistemaos03'),
-    'password': os.getenv('zinholui47'),
-    'database': os.getenv('sistemaos03'),
-    'port': int(os.getenv('3306'))
+    'host': os.getenv('DB_HOST', 'mysql.sistemaos.com.br'),
+    'user': os.getenv('DB_USER', 'sistemaos03'),
+    'password': os.getenv('DB_PASSWORD', 'zinholui47'),
+    'database': os.getenv('DB_NAME', 'sistemaos03'),
+    'port': int(os.getenv('DB_PORT', 3306))
 }
 
 def get_db():
