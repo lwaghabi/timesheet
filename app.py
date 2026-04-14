@@ -19,7 +19,7 @@ db_config = {
     'user': os.getenv('sistemaos03'),
     'password': os.getenv('zinholui47'),
     'database': os.getenv('sistemaos03'),
-    'port': int(os.getenv(3306))
+    'port': int(os.getenv('3306'))
 }
 
 def get_db():
@@ -327,7 +327,7 @@ def test_db():
             user=os.getenv('DB_USER', 'sistemaos03'),
             password=os.getenv('DB_PASSWORD', 'zinholui47'),
             database=os.getenv('DB_NAME', 'sistemaos03'),
-            port=int(os.getenv('DB_PORT', 3306))
+            port=int(os.getenv('DB_PORT', '3306'))
         )
         conn.close()
         return jsonify({'success': True, 'message': 'Conexão com banco OK'})
