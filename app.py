@@ -318,16 +318,46 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
 
 @app.route('/api/test-db', methods=['GET'])
+@app.route('/api/test-db', methods=['GET'])
 def test_db():
+    import os
+    import mysql.connector
+    host=os.getenv('DB_HOST', 'mysql.sistemaos.com.br'),
+    user=os.getenv('DB_USER', 'sistemaos03'),
+    password=os.getenv('DB_PASSWORD', 'zinholui47'),
+    database=os.getenv('DB_NAME', 'sistemaos03'),
+    port=int(os.getenv('DB_PORT', '3306'))
+    
+    # Converte porta para inteiro
     try:
-        import mysql.connector
-        import os
+        port = int(port_str)
+    except:
+        port = 3306
+    
+    # Verifica se todas as variáveis existem
+    missing = []
+    if not host: missing.append('DB_HOST')
+    if not user: missing.append('DB_USER')
+    if not password: missing.append('DB_PASSWORD')
+    if not database: missing.append('DB_NAME')
+    
+    if missing:
+        return jsonify({
+            'success': False, 
+            'error': f'Variáveis de ambiente faltando: {missing}',
+            'host_recebido': host,
+            'user_recebido': user,
+            'database_recebido': database,
+            'port_recebida': port_str
+        }), 500
+    
+    try:
         conn = mysql.connector.connect(
-            host=os.getenv('mysql.sistemaos.com.br'),
-            user=os.getenv('sistemaos03'),
-            password=os.getenv('zinholui47'),
-            database=os.getenv('sistemaos03'),
-            port=int(os.getenv('3306'))
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port
         )
         conn.close()
         return jsonify({'success': True, 'message': 'Conexão com banco OK'})
